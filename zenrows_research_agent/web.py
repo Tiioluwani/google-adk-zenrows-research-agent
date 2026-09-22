@@ -5,7 +5,7 @@ import os
 import requests
 
 ZENROWS_ENDPOINT = "https://api.zenrows.com/v1/"
-DEFAULT_TIMEOUT = 60
+DEFAULT_TIMEOUT = 180
 MAX_TOOL_CONTENT = 12_000
 
 
@@ -62,6 +62,13 @@ def fetch_protected_page(url: str) -> dict:
         response.raise_for_status()
     except requests.RequestException as exc:
         return {"status": "error", "url": url, "error": str(exc)}
+
+    if not response.text.strip():
+        return {
+            "status": "error",
+            "url": url,
+            "error": "Zenrows returned an empty response.",
+        }
 
     return {
         "status": "success",
