@@ -119,7 +119,7 @@ Compare standard HTTP and Zenrows access to the protected test page:
 python scripts/compare_fetch.py
 ```
 
-Start the Google ADK command-line interface from the directory above the project folder:
+Start the Google ADK command-line interface from the repository root:
 
 ```bash
 adk run zenrows_research_agent
@@ -133,9 +133,37 @@ Fetch https://www.scrapingcourse.com/cloudflare-challenge and report the page ti
 
 ## Output
 
-The comparison script prints valid JSON with separate `standard_http` and `zenrows` results. A successful validation should show the HTTP request as blocked and the Zenrows request as successful, but the exact status and page text must come from your live run.
+The successful comparison run produced:
 
-The ADK agent should call `fetch_protected_page` and answer from the returned Markdown. If retrieval fails, its instruction requires it to report the failure instead of inventing page content.
+```json
+{
+  "standard_http": {
+    "status": "blocked",
+    "url": "https://www.scrapingcourse.com/cloudflare-challenge",
+    "status_code": 403,
+    "content_preview": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal",
+    "error": null
+  },
+  "zenrows": {
+    "status": "success",
+    "url": "https://www.scrapingcourse.com/cloudflare-challenge",
+    "status_code": null,
+    "content_preview": "[![](https://www.scrapingcourse.com/assets/images/logo.svg) Scraping Course](http://www.scrapingcourse.com/)\n\n# Cloudflare Challenge\n\n![](https://www.scrapingcourse.com/assets/images/challenge.svg)\n\n## You bypassed the Cloudflare challenge! :D",
+    "error": null
+  }
+}
+```
+
+The successful ADK response was:
+
+```text
+Based on the content retrieved from the URL, here are the requested details:
+
+* **Source URL:** https://www.scrapingcourse.com/cloudflare-challenge
+* **Page Title / Main Heading:** Cloudflare Challenge
+* **Challenge Passed Status:** Yes, the Cloudflare challenge was successfully passed/bypassed.
+* **Visible Verification Text:** `You bypassed the Cloudflare challenge! :D`
+```
 
 ## Technologies
 

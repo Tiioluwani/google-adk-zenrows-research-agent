@@ -23,7 +23,7 @@ The test run emitted the upstream Google ADK `BaseAgentConfig` deprecation warni
 
 ## Comparison Result
 
-The standard HTTP request returned `403`, and its response contained `Just a moment...`. Fetch did not return page content because the configured Zenrows credential received HTTP `401 Unauthorized`.
+The successful comparison run returned HTTP `403` with `Just a moment...` for the standard request and nonempty Markdown containing `Cloudflare Challenge` and `You bypassed the Cloudflare challenge! :D` for Fetch.
 
 ```json
 {
@@ -35,11 +35,11 @@ The standard HTTP request returned `403`, and its response contained `Just a mom
     "error": null
   },
   "zenrows": {
-    "status": "error",
+    "status": "success",
     "url": "https://www.scrapingcourse.com/cloudflare-challenge",
     "status_code": null,
-    "content_preview": "",
-    "error": "401 Client Error: Unauthorized for url: https://api.zenrows.com/v1/?apikey=[REDACTED]&url=https%3A%2F%2Fwww.scrapingcourse.com%2Fcloudflare-challenge&mode=auto&response_type=markdown&original_status=true"
+    "content_preview": "[![](https://www.scrapingcourse.com/assets/images/logo.svg) Scraping Course](http://www.scrapingcourse.com/)\n\n# Cloudflare Challenge\n\n![](https://www.scrapingcourse.com/assets/images/challenge.svg)\n\n## You bypassed the Cloudflare challenge! :D",
+    "error": null
   }
 }
 ```
@@ -58,10 +58,13 @@ User prompt:
 Fetch https://www.scrapingcourse.com/cloudflare-challenge and report the page title, whether the challenge was passed, and the visible verification text. Cite the source URL.
 ```
 
-The run emitted experimental warnings for `InMemoryCredentialService`, `BaseCredentialService`, and `FeatureName.JSON_SCHEMA_FOR_FUNC_DECL`. It then failed before calling Fetch:
+The successful live run occurred on September 20, 2026. Google ADK experimental warnings appeared but did not prevent execution. The exact response was:
 
 ```text
-google.genai.errors.ServerError: 503 UNAVAILABLE. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-```
+Based on the content retrieved from the URL, here are the requested details:
 
-No successful ADK response was produced during this validation run.
+* **Source URL:** https://www.scrapingcourse.com/cloudflare-challenge
+* **Page Title / Main Heading:** Cloudflare Challenge
+* **Challenge Passed Status:** Yes, the Cloudflare challenge was successfully passed/bypassed.
+* **Visible Verification Text:** `You bypassed the Cloudflare challenge! :D`
+```
