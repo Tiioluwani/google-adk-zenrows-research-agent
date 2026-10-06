@@ -61,7 +61,8 @@ def fetch_protected_page(url: str) -> dict:
         )
         response.raise_for_status()
     except requests.RequestException as exc:
-        return {"status": "error", "url": url, "error": str(exc)}
+        error = str(exc).replace(api_key, "[REDACTED]")
+        return {"status": "error", "url": url, "error": error}
 
     if not response.text.strip():
         return {

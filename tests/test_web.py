@@ -71,12 +71,17 @@ def test_zenrows_reports_empty_response(mock_get: Mock, monkeypatch) -> None:
 @patch("zenrows_research_agent.web.requests.get")
 def test_zenrows_returns_structured_error(mock_get: Mock, monkeypatch) -> None:
     monkeypatch.setenv("ZENROWS_API_KEY", "test-key")
-    mock_get.side_effect = requests.Timeout("request timed out")
+    mock_get.side_effect = requests.HTTPError(
+        "401 Client Error for url: https://api.zenrows.com/v1/?apikey=test-key"
+    )
 
     result = fetch_protected_page("https://example.com/protected")
 
     assert result == {
         "status": "error",
         "url": "https://example.com/protected",
-        "error": "request timed out",
+        "error": (
+            "401 Client Error for url: "
+            "https://api.zenrows.com/v1/?apikey=[REDACTED]"
+        ),
     }

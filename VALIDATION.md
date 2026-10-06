@@ -1,27 +1,50 @@
-# Validation record
+# Validation Record
 
 ## Environment
 
-- Live run date: September 20, 2026
+- Validation date: October 6, 2026
 - Python: 3.12.14
 - Google ADK: 2.9.2
+- python-dotenv: 1.2.3
 - Requests: 2.34.2
+- pytest: 9.1.1
+- Ruff: 0.16.8
 - Model: `gemini-3.6-flash`
 - Target: `https://www.scrapingcourse.com/cloudflare-challenge`
 
-## Automated checks
+## Automated Checks
 
-- `pytest -q`: 5 passed
-- `ruff check .`: passed
-- `uv build`: source distribution and wheel built successfully
+- `python -m pip install -r requirements.txt`: completed successfully
+- `python -m pytest -q`: 6 passed, 1 warning in 1.10s
+- `python -m ruff check .`: `All checks passed!`
+- `python -m pip wheel . --no-deps -w dist`: successfully built `google_adk_zenrows_research_agent-0.1.0-py3-none-any.whl`
 
-Google ADK experimental warnings appeared during the live run but did not prevent execution. Google ADK 2.9.2 also emits one upstream deprecation warning for `BaseAgentConfig` while importing the agent. The project does not import or use `BaseAgentConfig` directly.
+The test run emitted the upstream Google ADK `BaseAgentConfig` deprecation warning. The project does not import or use `BaseAgentConfig` directly.
 
-## Live ADK result
+## Comparison Result
 
-An earlier live ADK attempt reached the model provider, but `gemini-flash-latest` returned a temporary `503 UNAVAILABLE` response because the model was experiencing high demand. The project was then pinned to `gemini-3.6-flash`.
+The standard HTTP request returned `403`, and its response contained `Just a moment...`. Fetch did not return page content because the configured Zenrows credential received HTTP `401 Unauthorized`.
 
-The live run succeeded on September 20, 2026, using `gemini-3.6-flash`.
+```json
+{
+  "standard_http": {
+    "status": "blocked",
+    "url": "https://www.scrapingcourse.com/cloudflare-challenge",
+    "status_code": 403,
+    "content_preview": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal",
+    "error": null
+  },
+  "zenrows": {
+    "status": "error",
+    "url": "https://www.scrapingcourse.com/cloudflare-challenge",
+    "status_code": null,
+    "content_preview": "",
+    "error": "401 Client Error: Unauthorized for url: https://api.zenrows.com/v1/?apikey=[REDACTED]&url=https%3A%2F%2Fwww.scrapingcourse.com%2Fcloudflare-challenge&mode=auto&response_type=markdown&original_status=true"
+  }
+}
+```
+
+## Google ADK Result
 
 Command:
 
@@ -35,18 +58,10 @@ User prompt:
 Fetch https://www.scrapingcourse.com/cloudflare-challenge and report the page title, whether the challenge was passed, and the visible verification text. Cite the source URL.
 ```
 
-Verified result:
+The run emitted experimental warnings for `InMemoryCredentialService`, `BaseCredentialService`, and `FeatureName.JSON_SCHEMA_FOR_FUNC_DECL`. It then failed before calling Fetch:
 
-- Source URL: `https://www.scrapingcourse.com/cloudflare-challenge`
-- Page title/main heading: `Cloudflare Challenge`
-- Challenge passed: Yes
-- Visible verification text: `You bypassed the Cloudflare challenge! :D`
+```text
+google.genai.errors.ServerError: 503 UNAVAILABLE. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+```
 
-## Standard HTTP result
-
-The comparison script returned HTTP `403`. The response began with a page titled `Just a moment...`, which confirms that the ordinary request received the Cloudflare challenge rather than the target content.
-
-## Zenrows comparison result
-
-The earlier Zenrows comparison returned `success` with the protected page content.
-The Zenrows request configuration now uses Adaptive Stealth Mode with `mode=auto` and `response_type=markdown`.
+No successful ADK response was produced during this validation run.

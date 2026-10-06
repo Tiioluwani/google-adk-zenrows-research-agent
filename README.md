@@ -1,8 +1,8 @@
-# Google ADK Zenrows research agent
+# Google ADK Zenrows Research Agent
 
 ## Description
 
-This project shows how to give a Google Agent Development Kit agent access to a protected or JavaScript-rendered web page. Google ADK handles the agent workflow, while a Python function calls Zenrows and returns Markdown that the model can use for its answer.
+This project shows how to give a Google Agent Development Kit agent access to a protected or JavaScript-rendered web page. Google ADK handles the agent workflow, while a Python function calls Zenrows [Fetch](https://docs.zenrows.com/fetch/api-reference) and returns Markdown that the model can use for its answer.
 
 The included comparison script sends the same Cloudflare test URL through a standard HTTP request and Zenrows so you can record the difference for the accompanying tutorial.
 
@@ -13,13 +13,13 @@ The included comparison script sends the same Cloudflare test URL through a stan
 - Returns Markdown instead of passing an entire raw HTML document to the model.
 - Reports retrieval errors as structured tool results.
 - Compares Zenrows with a standard HTTP request on the same URL.
-- Includes mocked tests that do not spend Zenrows or Gemini credits.
+- Includes unit tests that replace external HTTP calls with test responses, so running `pytest` does not spend Zenrows or Gemini credits.
 
 ## Prerequisites
 
 - Python 3.10 or later
 - A Google AI Studio API key
-- A Zenrows API key
+- A [Zenrows API key](https://app.zenrows.com/register)
 
 ## Installation
 
@@ -46,7 +46,7 @@ On Windows PowerShell, activate it with:
 Install the project and its development dependencies:
 
 ```bash
-python -m pip install -e ".[dev]"
+python -m pip install -r requirements.txt
 ```
 
 ## Configuration
@@ -72,7 +72,7 @@ ZENROWS_API_KEY=your_zenrows_api_key
 
 The `.gitignore` file excludes `.env` so the keys are not committed.
 
-## Project structure
+## Project Structure
 
 ```text
 google-adk-zenrows-research-agent/
@@ -87,21 +87,27 @@ google-adk-zenrows-research-agent/
 │   └── web.py
 ├── .env.example
 ├── .gitignore
+├── LICENSE
+├── requirements.txt
 ├── pyproject.toml
-└── README.md
+├── README.md
+├── uv.lock
+└── VALIDATION.md
 ```
 
-## How it works
+## How It Works
 
-The `fetch_protected_page` function accepts a public URL and sends it to the Zenrows Fetch API. It enables Adaptive Stealth Mode with `mode=auto`, asks for Markdown, and returns a dictionary containing the retrieval status, URL, and page content.
+The `fetch_protected_page` function accepts a public URL and sends it to Fetch. It enables Adaptive Stealth Mode with `mode=auto`, asks for Markdown, and returns a dictionary containing the retrieval status, URL, and page content.
 
-Google ADK inspects the function signature and docstring when the function is added to the agent's `tools` list. The agent uses the stable `gemini-3.6-flash` model, which can select the tool, pass it a URL, and use the returned content to answer the user's research question.
+The 180-second timeout gives `mode=auto` enough time to complete retrieval on the protected target. The function also checks that the response contains page content before returning it to the agent, preventing an empty response from being treated as a successful retrieval.
+
+Google ADK inspects the function signature and docstring when the function is added to the agent's `tools` list. The agent uses the `gemini-3.6-flash` model, which can select the tool, pass it a URL, and use the returned content to answer the user's research question.
 
 The function limits returned content to 12,000 characters so a large page does not fill the model context unnecessarily. For a production system, replace this simple limit with section selection, extraction, or chunking based on the pages you need to research.
 
-## Running the project
+## Running the Project
 
-Run the mocked test suite first:
+Run the unit test suite first:
 
 ```bash
 pytest -q
@@ -116,7 +122,7 @@ python scripts/compare_fetch.py
 Start the Google ADK command-line interface from the directory above the project folder:
 
 ```bash
-adk run google-adk-zenrows-research-agent/zenrows_research_agent
+adk run zenrows_research_agent
 ```
 
 Then submit this task:
@@ -141,4 +147,4 @@ The ADK agent should call `fetch_protected_page` and answer from the returned Ma
 - pytest
 - Ruff
 
-## Related article
+## Related Article
